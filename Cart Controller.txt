@@ -1,0 +1,120 @@
+Cart Controller
+==========================================================
+
+
+package eCommerce.controller;
+
+import javax.servlet.http.HttpSession;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import eCommerce.DAO.CartDAO;
+Import eCommerce.DAO.ProductDAO;
+import eCommerce.module.CartItem;
+
+
+@Controller
+
+public class CartController {
+
+	@Autowired
+	CartDAO cartDAO;
+	
+	@Autowired
+	ProductDAO productDAO;
+	
+	@RequestMapping("/cart")
+	
+	public String ShowCart(Model m,HttpSession session)
+	{
+		String username=(String)session.getAttribute("username");
+		List<CartItem> cartItemList=cartDAO.listCartItems(username);
+		
+		m.addAttribute("cartItemList",cartItemList);
+		m.addAttribute("grandTotal",this.getGrandTotal(cartItemList));
+		return "Cart";
+	}
+	
+	@RequestMapping("/addToCart/{productId}")
+	public String  addToCart(@Pathvariable ("productId")int productId,@RequestParam("quantity")int quantity,httpSession session,Model m);
+	
+	{
+		Product product =productDAO.getProduct(productId);
+		String username =(String)session.getAttribute("username");
+		
+		CartItem cartItem=new CartItem();
+		cartItem.setProductid(product.getProductId());
+		cartItem.setProductName(product.getProductName());
+		cartItem.setQuantity(quantity);
+		cartItem.setPrice(product.getPrice());
+		cartItem.setPaymentStatus("NP");
+		cartItem.setUsername(username);
+		
+		cartDAO.addCartItem(cartItem);
+		
+		list<CartItem>cartItemList=cartDAO.listCartItems(username);
+		
+		
+		m.addAttribute("cartItemList",cartItemList);
+		m.addAttribute("grandTotal",this.getGrandTotal(cartItemList));
+		
+		return "Cart";
+		
+		
+	
+	}
+	
+	@RequestMapping("/updateCartItem/{cartItemId}")
+	public String  addToCart(@Pathvariable ("cartItemId")int cartItemId,@RequestParam("quantity")int quantity,Modelm,httpSession session);
+	{
+		CartItem cartItem=cartDAO.getCartItem(cartItemId);
+		cartItem.setQuantity(quantity);
+	cartDAO.updateCartItem(cartItem);
+	
+	
+	String username =(String)session.getAttribute("username");
+	List<CartItem>cartItemlist=cartDAO.listCartItems(username);
+	
+	m.addAttribute("cartItemlist",cartItemsList);
+	m.addAttribute("grandTotal",this.getGrandTotal(cartItemlist));
+	return "Cart";
+	
+	
+	}
+	
+	
+	@Requestmapping("/deleteCartItem/{cartItemId}")
+	
+	public String deleteCartItem(@Pathvariable("cartItemId")int cartItemId,Modal m,HttpSession session);
+	{
+		CartItem cartItem=cartDAO.getCartItem(cartItemId);
+		cartDAO.deleteCartItem(cartItem);
+		
+		String username=(String)session.getAttribute("Username");
+		list<CartItem>cartItemlist=cartDAO.listCartItems(username);
+		
+		
+		
+		m.addAttribute("cartItemList",cartItemList);
+		m.addAttribute("grandTotal",this.getGrandTotal(cartItemList));
+		
+		return "Cart";
+		
+		
+	}
+	
+	
+	
+	public int getGrandTotal(List<cartItem>cartList)
+	
+	{
+		int grandTotal=0,count=0;
+		while(count<cartlist.size()) {
+			grandTotal=grandTotal+(cartList.get(count).getQuantity()*cartList.get(count).getPrice());
+		}
+		
+		return grandTotal;
+	}
